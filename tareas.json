@@ -1,0 +1,34 @@
+{
+  "tareas": [
+    {
+      "id": 1764038388458,
+      "titulo": "tarea importante",
+      "fecha": "2025-11-25",
+      "hora": "20:41",
+      "categoriaId": "2",
+      "completada": true,
+      "fechaCreacion": "2025-11-25T02:39:48.472Z",
+      "fechaActualizacion": "2025-11-25T02:39:51.340Z"
+    }
+  ],
+  "categorias": [
+    {
+      "id": 1,
+      "nombre": "Trabajo",
+      "color": "#007bff",
+      "fechaCreacion": "2025-11-22T01:21:22.806Z"
+    },
+    {
+      "id": 2,
+      "nombre": "Personal",
+      "color": "#28a745",
+      "fechaCreacion": "2025-11-22T01:21:22.806Z"
+    },
+    {
+      "id": 3,
+      "nombre": "Estudio",
+      "color": "#dc3545",
+      "fechaCreacion": "2025-11-22T01:21:22.806Z"
+    }
+  ]
+}

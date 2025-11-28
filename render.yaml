@@ -1,0 +1,13 @@
+# En tu proyecto, crear este archivo:
+
+# Archivo: render.yaml
+services:
+  - type: web
+    name: agenda-app
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

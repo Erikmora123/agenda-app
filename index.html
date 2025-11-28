@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda Minimalista</title>
+<style>
+  /* Reset y tipografía */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f9f9f9; color: #222; transition: all 0.3s ease; }
+  body.dark-theme { background-color: #222; color: #fff; }
+
+  /* Header */
+  header { background-color: #333; color: #fff; padding: 1.5rem 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  header h1 { font-size: 2rem; font-weight: 600; }
+
+  /* Navegación */
+  nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+  nav button { padding: 0.6rem 1.2rem; border: none; border-radius: 8px; background-color: #e0e0e0; color: #222; cursor: pointer; transition: 0.3s; font-weight: 500; }
+  nav button:hover { background-color: #d5d5d5; }
+  nav button.active { background-color: #555; color: #fff; }
+  .dark-theme nav button { background-color: #444; color: #fff; }
+  .dark-theme nav button:hover { background-color: #555; }
+
+  /* Secciones */
+  section { display: none; padding: 1rem 1rem 2rem 1rem; }
+  section.active { display: block; }
+  h2 { text-align: center; margin-bottom: 1rem; font-size: 1.5rem; color: #222; }
+  .dark-theme h2 { color: #fff; }
+
+  /* Formularios */
+  form { display: flex; flex-direction: column; gap: 0.8rem; max-width: 400px; margin: auto; background: #fff; padding: 1.5rem; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .dark-theme form { background: #333; }
+  input, select, button { padding: 0.6rem; font-size: 1rem; border-radius: 5px; border: 1px solid #ccc; }
+  .dark-theme input, .dark-theme select { background: #444; color: #fff; border-color: #555; }
+  button[type="submit"] { background-color: #222; color: white; border: none; cursor: pointer; transition: 0.3s; }
+  button[type="submit"]:hover { background-color: #555; }
+  .dark-theme button[type="submit"] { background-color: #555; }
+  .dark-theme button[type="submit"]:hover { background-color: #777; }
+
+  /* Calendario */
+  .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: 500; color: #222; }
+  .dark-theme .calendar-header { color: #fff; }
+  .calendar-header button { background-color: #222; color: white; border: none; padding: 0.5rem 1rem; border-radius: 5px; cursor: pointer; }
+  .calendar-header button:hover { background-color: #555; }
+  #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .day { background-color: #fff; padding: 0.5rem; border-radius: 6px; min-height: 80px; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center; color: #222; transition: all 0.3s ease; }
+  .dark-theme .day { background-color: #333; color: #fff; }
+  .day strong { margin-bottom: 4px; }
+  .task { background-color: #555; color: white; font-size: 0.75rem; margin-top: 2px; padding: 2px 4px; border-radius: 4px; width: 90%; text-align: center; }
+  .task.categoria { background-color: #007bff; }
+
+  /* Estadísticas */
+  #stats { text-align: center; font-size: 1.1rem; margin-top: 10px; font-weight: 500; }
+
+  /* Configuración */
+  .delete-section { background-color: #e0e0e0; padding: 15px; border-radius: 10px; margin: 15px auto; max-width: 400px; color: #222; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .dark-theme .delete-section { background-color: #333; color: #fff; }
+  .delete-section h3 { margin-bottom: 8px; text-align: center; }
+  .delete-section label, .delete-section button { display: block; width: 100%; text-align: center; margin-top: 5px; }
+  .delete-section button { padding: 0.5rem; border: none; border-radius: 5px; background-color: #222; color: white; cursor: pointer; transition: 0.3s; }
+  .delete-section button:hover { background-color: #555; }
+  .dark-theme .delete-section button { background-color: #555; }
+  .dark-theme .delete-section button:hover { background-color: #777; }
+  .task-list { max-height: 200px; overflow-y: auto; margin-top: 10px; }
+  .task-list div { margin-bottom: 5px; background: #fff; padding: 5px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px; }
+  .dark-theme .task-list div { background: #444; }
+  .task-checkbox { margin-right: 8px; }
+  .task-completed { text-decoration: line-through; opacity: 0.7; }
+
+  /* Categorías */
+  .categoria-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin: 5px 0; background: #fff; border-radius: 5px; }
+  .dark-theme .categoria-item { background: #444; }
+  .categoria-color { width: 20px; height: 20px; border-radius: 50%; margin-right: 10px; }
+
+  /* Login */
+  .login-section { max-width: 300px; margin: 2rem auto; padding: 1.5rem; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .dark-theme .login-section { background: #333; }
+  .login-section h3 { text-align: center; margin-bottom: 1rem; }
+  .auth-status { padding: 10px; margin: 10px 0; border-radius: 5px; text-align: center; }
+  .auth-success { background-color: #d4edda; color: #155724; }
+  .auth-error { background-color: #f8d7da; color: #721c24; }
+  .dark-theme .auth-success { background-color: #155724; color: #d4edda; }
+  .dark-theme .auth-error { background-color: #721c24; color: #f8d7da; }
+
+  /* Pruebas */
+  .pruebas-section { max-width: 600px; margin: 1rem auto; padding: 1rem; background: #fff; border-radius: 10px; }
+  .dark-theme .pruebas-section { background: #333; }
+  .prueba-item { margin: 10px 0; padding: 10px; border-radius: 5px; }
+  .prueba-pass { background: #d4edda; color: #155724; }
+  .prueba-fail { background: #f8d7da; color: #721c24; }
+
+  /* Modal */
+  .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+  .modal-content { background: #fff; padding: 25px; border-radius: 12px; text-align: center; width: 320px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+  .dark-theme .modal-content { background: #333; color: #fff; }
+  .modal-buttons { margin-top: 20px; display: flex; justify-content: space-around; }
+  .btn-confirm { background: #c0392b; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+  .btn-confirm:hover { background: #922b21; }
+  .btn-cancel { background: #95a5a6; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+  .btn-cancel:hover { background: #7f8c8d; }
+
+  /* Responsive */
+  @media(max-width: 500px){
+    nav { flex-direction: column; gap: 0.5rem; }
+    form, .delete-section { width: 90%; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mi Agenda - CRUD Completo</h1>
+</header>
+
+<nav>
+  <button id="nav-login" class="active">Login</button>
+  <button id="nav-tareas">Tareas</button>
+  <button id="nav-calendario">Calendario</button>
+  <button id="nav-categorias">Categorías</button>
+  <button id="nav-estadisticas">Estadísticas</button>
+  <button id="nav-pruebas">Pruebas</button>
+  <button id="nav-config">Configuración</button>
+</nav>
+
+<!-- Login -->
+<section id="login" class="active">
+  <div class="login-section">
+    <h3>Iniciar Sesión 🔐</h3>
+    <div id="authStatus"></div>
+    <form id="form-login">
+      <input type="text" id="usuario" placeholder="Usuario" value="admin" required>
+      <input type="password" id="contraseña" placeholder="Contraseña" value="admin123" required>
+      <button type="submit">Iniciar Sesión</button>
+    </form>
+    <p style="text-align: center; margin-top: 10px; font-size: 0.9rem;">
+      <strong>Credenciales demo:</strong><br>
+      Usuario: admin<br>
+      Contraseña: admin123
+    </p>
+  </div>
+</section>
+
+<!-- Tareas -->
+<section id="tareas">
+  <h2>📝 Gestión de Tareas</h2>
+  <form id="form-tarea">
+    <input type="text" id="titulo" placeholder="Título de la tarea" required>
+    <input type="date" id="fecha" required>
+    <input type="time" id="hora" required>
+    <select id="categoriaId">
+      <option value="">Sin categoría</option>
+    </select>
+    <button type="submit">✅ Guardar Tarea</button>
+  </form>
+
+  <div class="delete-section">
+    <h3>📋 Mis Tareas</h3>
+    <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"> Seleccionar todo</label>
+    <div id="taskList" class="task-list"></div>
+    <button onclick="confirmDelete()">🗑️ Eliminar seleccionadas</button>
+  </div>
+</section>
+
+<!-- Calendario -->
+<section id="calendario">
+  <div class="calendar-header">
+    <button onclick="changeMonth(-1)">«</button>
+    <h2 id="calendarTitle"></h2>
+    <button onclick="changeMonth(1)">»</button>
+  </div>
+  <div id="calendar"></div>
+</section>
+
+<!-- Categorías -->
+<section id="categorias">
+  <h2>🏷️ Gestión de Categorías</h2>
+  
+  <form id="form-categoria">
+    <input type="text" id="nombreCategoria" placeholder="Nombre de categoría" required>
+    <input type="color" id="colorCategoria" value="#007bff">
+    <button type="submit">➕ Agregar Categoría</button>
+  </form>
+
+  <div class="delete-section">
+    <h3>📂 Mis Categorías</h3>
+    <div id="categoriasList" class="task-list"></div>
+  </div>
+</section>
+
+<!-- Estadísticas -->
+<section id="estadisticas">
+  <h2>📊 Estadísticas</h2>
+  <div id="stats"></div>
+</section>
+
+<!-- Pruebas -->
+<section id="pruebas">
+  <h2>🧪 Pruebas del Sistema</h2>
+  
+  <div class="pruebas-section">
+    <h3>Pruebas Unitarias</h3>
+    <button onclick="ejecutarPruebasUnitarias()">🔬 Ejecutar Pruebas Unitarias</button>
+    <div id="resultadoPruebasUnitarias"></div>
+    
+    <h3>Prueba de Integración</h3>
+    <button onclick="ejecutarPruebaIntegracion()">🔄 Ejecutar Prueba de Integración</button>
+    <div id="resultadoPruebaIntegracion"></div>
+    
+    <h3>Checklist de Seguridad ✅</h3>
+    <div style="text-align: left; margin: 1rem;">
+      <div>🔐 Autenticación con tokens: <strong>IMPLEMENTADO</strong></div>
+      <div>🛡️ Sanitización XSS: <strong>IMPLEMENTADO</strong></div>
+      <div>✅ Validación de entrada: <strong>IMPLEMENTADO</strong></div>
+      <div>🗄️ CRUD Completo (2 entidades): <strong>IMPLEMENTADO</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- Configuración -->
+<section id="config">
+  <h2>⚙️ Configuración</h2>
+
+  <!-- Tema -->
+  <div class="delete-section">
+    <h3>🎨 Tema</h3>
+    <button onclick="toggleTheme()">🌙 Cambiar tema claro/oscuro</button>
+  </div>
+
+  <!-- Restablecer todas las tareas -->
+  <div class="delete-section">
+    <h3>🔄 Restablecer</h3>
+    <button onclick="confirmReset()">🗑️ Eliminar todas las tareas</button>
+  </div>
+</section>
+
+<!-- Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <p id="modalText">¿Seguro que deseas eliminar las tareas seleccionadas?</p>
+    <div class="modal-buttons">
+      <button class="btn-confirm" onclick="modalConfirmAction()">Sí</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =========================
+  // Variables globales y configuración
+  // =========================
+  const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  let modalAction = null;
+  let authToken = null;
+  let categorias = [];
+
+  // =========================
+  // Navegación entre secciones
+  // =========================
+  document.getElementById('nav-login').addEventListener('click', () => showSection('login'));
+  document.getElementById('nav-tareas').addEventListener('click', () => showSection('tareas'));
+  document.getElementById('nav-calendario').addEventListener('click', () => showSection('calendario'));
+  document.getElementById('nav-categorias').addEventListener('click', () => showSection('categorias'));
+  document.getElementById('nav-estadisticas').addEventListener('click', () => showSection('estadisticas'));
+  document.getElementById('nav-pruebas').addEventListener('click', () => showSection('pruebas'));
+  document.getElementById('nav-config').addEventListener('click', () => showSection('config'));
+
+  function showSection(sectionId) {
+    if (!authToken && sectionId !== 'login' && sectionId !== 'pruebas') {
+      alert('🔐 Debes iniciar sesión primero');
+      showSection('login');
+      return;
+    }
+
+    // Ocultar todas las secciones
+    document.querySelectorAll('section').forEach(section => {
+      section.classList.remove('active');
+    });
+    
+    // Remover clase active de todos los botones
+    document.querySelectorAll('nav button').forEach(button => {
+      button.classList.remove('active');
+    });
+    
+    // Mostrar sección seleccionada
+    document.getElementById(sectionId).classList.add('active');
+    
+    // Activar botón correspondiente
+    document.getElementById(`nav-${sectionId}`).classList.add('active');
+    
+    // Actualizar contenido específico de cada sección
+    if (sectionId === 'calendario') {
+      renderCalendario();
+    } else if (sectionId === 'estadisticas') {
+      renderEstadisticas();
+    } else if (sectionId === 'tareas') {
+      renderTareas();
+      loadCategorias();
+    } else if (sectionId === 'categorias') {
+      renderCategorias();
+    }
+  }
+
+  // =========================
+  // Autenticación - SEGURIDAD
+  // =========================
+  document.getElementById('form-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const credenciales = {
+      usuario: document.getElementById('usuario').value,
+      contraseña: document.getElementById('contraseña').value
+    };
+
+    try {
+      const response = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: credenciales
+      });
+      
+      authToken = response.token;
+      document.getElementById('authStatus').innerHTML = 
+        `<div class="auth-success">✅ ${response.message}</div>`;
+      
+      setTimeout(() => {
+        showSection('tareas');
+      }, 1000);
+      
+    } catch (error) {
+      document.getElementById('authStatus').innerHTML = 
+        `<div class="auth-error">❌ ${error.message}</div>`;
+    }
+  });
+
+  // =========================
+  // Funciones del Calendario
+  // =========================
+  function changeMonth(direction) {
+    currentMonth += direction;
+    
+    if (currentMonth > 11) {
+      currentMonth = 0;
+      currentYear++;
+    } else if (currentMonth < 0) {
+      currentMonth = 11;
+      currentYear--;
+    }
+    
+    renderCalendario();
+  }
+
+  // =========================
+  // Funciones del Modal
+  // =========================
+  function confirmDelete() {
+    const checkboxes = document.querySelectorAll(".task-checkbox:checked");
+    if (checkboxes.length === 0) {
+      alert("Selecciona al menos una tarea para eliminar");
+      return;
+    }
+    
+    modalAction = 'delete';
+    document.getElementById('modalText').textContent = `¿Seguro que deseas eliminar ${checkboxes.length} tarea(s) seleccionada(s)?`;
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+
+  function confirmReset() {
+    modalAction = 'reset';
+    document.getElementById('modalText').textContent = '¿Seguro que deseas eliminar TODAS las tareas? Esta acción no se puede deshacer.';
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    modalAction = null;
+  }
+
+  function modalConfirmAction() {
+    if (modalAction === 'delete') {
+      deleteSelectedTasks();
+    } else if (modalAction === 'reset') {
+      resetAllTasks();
+    }
+  }
+
+  // =========================
+  // Funciones de Configuración
+  // =========================
+  function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll(".task-checkbox");
+    const selectAll = document.getElementById("selectAll").checked;
+    
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = selectAll;
+    });
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark-theme');
+    localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+  }
+
+  // Cargar tema guardado
+  function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark-theme');
+    }
+  }
+
+  async function resetAllTasks() {
+    try {
+      const response = await apiRequest('/tareas');
+      const todasLasTareas = response.data;
+      
+      if (todasLasTareas.length === 0) {
+        alert("No hay tareas para eliminar");
+        closeModal();
+        return;
+      }
+      
+      const ids = todasLasTareas.map(t => t.id);
+      
+      await apiRequest('/tareas', {
+        method: 'DELETE',
+        body: { ids }
+      });
+      
+      closeModal();
+      await renderTareas();
+      await renderCalendario();
+      await renderEstadisticas();
+      alert("Todas las tareas han sido eliminadas");
+    } catch (error) {
+      console.error('Error al resetear tareas:', error);
+    }
+  }
+
+  // =========================
+  // Conexión con la API real
+  // =========================
+  const API_BASE_URL = '/api';
+
+  async function apiRequest(endpoint, options = {}) {
+    const config = {
+      method: options.method || 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    };
+
+    // Agregar token de autenticación si está disponible
+    if (authToken && endpoint !== '/auth/login') {
+      config.headers['Authorization'] = `Bearer ${authToken}`;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Error en la solicitud');
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error en API request:', error);
+      alert(`Error: ${error.message}`);
+      throw error;
+    }
+  }
+
+  // =========================
+  // PRUEBAS DEL SISTEMA
+  // =========================
+  async function ejecutarPruebasUnitarias() {
+    try {
+      const response = await apiRequest('/test/unitarias');
+      const container = document.getElementById('resultadoPruebasUnitarias');
+      container.innerHTML = '';
+      
+      response.pruebas_unitarias.forEach(prueba => {
+        const div = document.createElement('div');
+        div.className = `prueba-item ${prueba.resultado === 'PASS' ? 'prueba-pass' : 'prueba-fail'}`;
+        div.innerHTML = `
+          <strong>${prueba.nombre}</strong>: ${prueba.resultado}<br>
+          <small>Entrada: "${prueba.entrada}" → Salida: "${prueba.salida}"</small>
+        `;
+        container.appendChild(div);
+      });
+    } catch (error) {
+      console.error('Error en pruebas unitarias:', error);
+    }
+  }
+
+  async function ejecutarPruebaIntegracion() {
+    try {
+      const response = await apiRequest('/test/integracion');
+      const container = document.getElementById('resultadoPruebaIntegracion');
+      
+      const prueba = response.prueba_integracion;
+      container.innerHTML = `
+        <div class="prueba-item ${prueba.resultado === 'PASS' ? 'prueba-pass' : 'prueba-fail'}">
+          <strong>${prueba.nombre}</strong>: ${prueba.resultado}<br>
+          <small>${prueba.descripcion} - Tarea creada: ${prueba.tarea_creada}</small>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error en prueba de integración:', error);
+    }
+  }
+
+  // =========================
+  // Manejo del DOM con API real
+  // =========================
+
+  // Agregar tarea usando la API real
+  document.getElementById('form-tarea').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nuevaTarea = {
+      titulo: document.getElementById('titulo').value,
+      fecha: document.getElementById('fecha').value,
+      hora: document.getElementById('hora').value,
+      categoriaId: document.getElementById('categoriaId').value || null
+    };
+
+    try {
+      await apiRequest('/tareas', {
+        method: 'POST',
+        body: nuevaTarea
+      });
+      
+      await renderTareas();
+      await renderCalendario();
+      await renderEstadisticas();
+      document.getElementById('form-tarea').reset();
+      alert('✅ Tarea agregada correctamente');
+    } catch (error) {
+      // El error ya se maneja en apiRequest
+    }
+  });
+
+  // Agregar categoría usando la API real
+  document.getElementById('form-categoria').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const nuevaCategoria = {
+      nombre: document.getElementById('nombreCategoria').value,
+      color: document.getElementById('colorCategoria').value
+    };
+
+    try {
+      await apiRequest('/categorias', {
+        method: 'POST',
+        body: nuevaCategoria
+      });
+      
+      document.getElementById('form-categoria').reset();
+      await renderCategorias();
+      await loadCategorias();
+      alert('✅ Categoría agregada correctamente');
+    } catch (error) {
+      console.error('Error al agregar categoría:', error);
+    }
+  });
+
+  // Renderizar tareas desde la API
+  async function renderTareas() {
+    try {
+      const response = await apiRequest('/tareas');
+      const tareasData = response.data;
+      
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = '';
+      
+      tareasData.forEach((t, i) => {
+        const div = document.createElement('div');
+        const categoria = categorias.find(c => c.id === t.categoriaId);
+        const categoriaInfo = categoria ? `<span style="background:${categoria.color}; padding:2px 6px; border-radius:3px; color:white; font-size:0.8rem;">${categoria.nombre}</span>` : '';
+        
+        div.innerHTML = `
+          <input type="checkbox" class="task-checkbox" value="${t.id}" data-index="${i}">
+          <input type="checkbox" class="task-complete-checkbox" ${t.completada ? 'checked' : ''} onchange="toggleTaskComplete(${t.id}, this.checked)">
+          <span class="${t.completada ? 'task-completed' : ''}">
+            ${t.fecha} ${t.hora} - ${t.titulo}
+          </span>
+          ${categoriaInfo}
+        `;
+        taskList.appendChild(div);
+      });
+    } catch (error) {
+      console.error('Error al renderizar tareas:', error);
+    }
+  }
+
+  // Toggle estado de completado de tarea - OPERACIÓN UPDATE
+  async function toggleTaskComplete(taskId, completada) {
+    try {
+      await apiRequest(`/tareas/${taskId}`, {
+        method: 'PUT',
+        body: { completada }
+      });
+      
+      await renderTareas();
+      await renderEstadisticas();
+    } catch (error) {
+      console.error('Error al actualizar tarea:', error);
+    }
+  }
+
+  // Renderizar categorías
+  async function renderCategorias() {
+    try {
+      const response = await apiRequest('/categorias');
+      const categoriasData = response.data;
+      
+      const categoriasList = document.getElementById("categoriasList");
+      categoriasList.innerHTML = '';
+      
+      categoriasData.forEach(categoria => {
+        const div = document.createElement('div');
+        div.className = 'categoria-item';
+        div.innerHTML = `
+          <div style="display: flex; align-items: center;">
+            <div class="categoria-color" style="background-color: ${categoria.color}"></div>
+            <span>${categoria.nombre}</span>
+          </div>
+          <button onclick="eliminarCategoria(${categoria.id})" style="padding: 4px 8px; background: #c0392b; color: white; border: none; border-radius: 3px; cursor: pointer;">Eliminar</button>
+        `;
+        categoriasList.appendChild(div);
+      });
+    } catch (error) {
+      console.error('Error al renderizar categorías:', error);
+    }
+  }
+
+  // Eliminar categoría
+  async function eliminarCategoria(categoriaId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta categoría?')) {
+      return;
+    }
+    
+    try {
+      await apiRequest(`/categorias/${categoriaId}`, {
+        method: 'DELETE'
+      });
+      
+      await renderCategorias();
+      await loadCategorias();
+      alert('✅ Categoría eliminada correctamente');
+    } catch (error) {
+      console.error('Error al eliminar categoría:', error);
+    }
+  }
+
+  // Cargar categorías para el selector
+  async function loadCategorias() {
+    try {
+      const response = await apiRequest('/categorias');
+      categorias = response.data;
+      
+      const categoriaSelect = document.getElementById('categoriaId');
+      categoriaSelect.innerHTML = '<option value="">Sin categoría</option>';
+      
+      categorias.forEach(categoria => {
+        const option = document.createElement('option');
+        option.value = categoria.id;
+        option.textContent = categoria.nombre;
+        categoriaSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error al cargar categorías:', error);
+    }
+  }
+
+  // Eliminar tareas seleccionadas
+  async function deleteSelectedTasks() {
+    const checkboxes = document.querySelectorAll(".task-checkbox:checked");
+    const ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    
+    if (ids.length === 0) {
+      alert("Selecciona al menos una tarea para eliminar");
+      return;
+    }
+
+    try {
+      await apiRequest('/tareas', {
+        method: 'DELETE',
+        body: { ids }
+      });
+      
+      document.getElementById("selectAll").checked = false;
+      closeModal();
+      await renderTareas();
+      await renderCalendario();
+      await renderEstadisticas();
+      alert('✅ Tareas eliminadas correctamente');
+    } catch (error) {
+      console.error('Error al eliminar tareas:', error);
+    }
+  }
+
+  // Renderizar calendario
+  async function renderCalendario() {
+    try {
+      const response = await apiRequest('/tareas');
+      const tareasData = response.data;
+      
+      const calendarDiv = document.getElementById('calendar');
+      const calendarTitle = document.getElementById('calendarTitle');
+      calendarDiv.innerHTML = '';
+      calendarTitle.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+      
+      const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+      // Días vacíos al inicio
+      for(let i = 0; i < firstDay; i++){ 
+        const div = document.createElement('div'); 
+        div.classList.add('day'); 
+        calendarDiv.appendChild(div);
+      }
+
+      // Días del mes
+      for(let d = 1; d <= daysInMonth; d++) {
+        const div = document.createElement('div'); 
+        div.classList.add('day'); 
+        div.innerHTML = `<strong>${d}</strong>`;
+        
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const tareasDelDia = tareasData.filter(t => t.fecha === dateStr);
+        
+        tareasDelDia.forEach(t => {
+          const categoria = categorias.find(c => c.id === t.categoriaId);
+          const span = document.createElement('span'); 
+          span.classList.add('task'); 
+          if (categoria) {
+            span.classList.add('categoria');
+            span.style.backgroundColor = categoria.color;
+          }
+          span.textContent = `${t.titulo} ${t.hora}`; 
+          div.appendChild(span);
+        });
+        
+        calendarDiv.appendChild(div);
+      }
+    } catch (error) {
+      console.error('Error al renderizar calendario:', error);
+    }
+  }
+
+  // Renderizar estadísticas
+  async function renderEstadisticas() {
+    try {
+      const response = await apiRequest('/tareas');
+      const tareasData = response.data;
+      
+      const stats = document.getElementById('stats');
+      const total = tareasData.length;
+      const completadas = tareasData.filter(t => t.completada).length;
+      const hoy = tareasData.filter(t => t.fecha === new Date().toISOString().split('T')[0]).length;
+      const porcentaje = total > 0 ? Math.round((completadas / total) * 100) : 0;
+      
+      stats.innerHTML = `
+        <div style="text-align: center; line-height: 1.8;">
+          <strong>📊 Resumen de tareas:</strong><br>
+          📝 Total: ${total}<br>
+          ✅ Completadas: ${completadas}<br>
+          ⏳ Pendientes: ${total - completadas}<br>
+          📈 Progreso: ${porcentaje}%<br>
+          🎯 Para hoy: ${hoy}
+        </div>
+      `;
+    } catch (error) {
+      console.error('Error al renderizar estadísticas:', error);
+    }
+  }
+
+  // =========================
+  // Inicialización
+  // =========================
+  document.addEventListener('DOMContentLoaded', function() {
+    // Establecer fecha mínima como hoy
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fecha').min = today;
+    
+    // Cargar tema guardado
+    loadTheme();
+    
+    console.log('✅ Agenda inicializada correctamente');
+    console.log('🔐 Sistema de seguridad implementado');
+    console.log('🧪 Pruebas integradas en el servidor');
+  });
+</script>
+
+</body>
+</html>
