@@ -1,13 +1,15 @@
-# En tu proyecto, crear este archivo:
-
-# Archivo: render.yaml
 services:
   - type: web
-    name: agenda-app
+    name: mi-agenda-backend
     env: node
+    region: ohio  # Puedes cambiarlo a us-east si quieres
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node server.js
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 3000
+    healthCheckPath: /api/tareas
+    autoDeploy: true

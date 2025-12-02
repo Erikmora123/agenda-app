@@ -6,9 +6,27 @@
       "fecha": "2025-11-25",
       "hora": "20:41",
       "categoriaId": "2",
-      "completada": true,
+      "completada": false,
       "fechaCreacion": "2025-11-25T02:39:48.472Z",
-      "fechaActualizacion": "2025-11-25T02:39:51.340Z"
+      "fechaActualizacion": "2025-11-29T00:25:53.162Z"
+    },
+    {
+      "id": 1764375896875,
+      "titulo": "tarea importante",
+      "fecha": "2025-12-06",
+      "hora": "18:27",
+      "categoriaId": "3",
+      "completada": false,
+      "fechaCreacion": "2025-11-29T00:24:56.876Z"
+    },
+    {
+      "id": 1764376618735,
+      "titulo": "Reunion",
+      "fecha": "2025-12-05",
+      "hora": "18:39",
+      "categoriaId": "1",
+      "completada": false,
+      "fechaCreacion": "2025-11-29T00:36:58.735Z"
     }
   ],
   "categorias": [
@@ -29,6 +47,12 @@
       "nombre": "Estudio",
       "color": "#dc3545",
       "fechaCreacion": "2025-11-22T01:21:22.806Z"
+    },
+    {
+      "id": 1764376142193,
+      "nombre": "Negocio",
+      "color": "#cae63d",
+      "fechaCreacion": "2025-11-29T00:29:02.193Z"
     }
   ]
 }

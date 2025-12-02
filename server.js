@@ -4,10 +4,51 @@ const fs = require('fs');
 const express = require('express');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;  // ✅ IMPORTANTE: Usa el puerto de Render
 
-// Middleware
-app.use(cors());
+// =========================
+// CONFIGURACIÓN CORS PARA PRODUCCIÓN
+// =========================
+const allowedOrigins = [
+  'https://mi-agenda-app-db.web.app',  // Tu Firebase
+  'http://localhost:3000',              // Desarrollo local
+  'http://localhost:5500'               // Live Server
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permitir requests sin origen (como mobile apps o curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'El origen CORS no está permitido';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true
+}));
+
+// Middleware para headers CORS manuales (por si acaso)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// =========================
+// RESTA DEL CÓDIGO (TODO LO QUE YA TENÍAS)
+// =========================
+
 app.use(express.json());
 app.use(express.static('.'));
 
@@ -426,11 +467,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor' });
 });
 
-// Iniciar servidor con mensajes detallados
+// =========================
+// INICIAR SERVIDOR CON INFORMACIÓN DE PRODUCCIÓN
+// =========================
 app.listen(PORT, () => {
   console.log('=========================================');
-  console.log('🚀 SERVIDOR INICIADO CORRECTAMENTE');
-  console.log(`📍 URL: http://localhost:${PORT}`);
+  console.log('🚀 SERVIDOR INICIADO EN PRODUCCIÓN');
+  console.log(`📍 Puerto: ${PORT}`);
+  console.log(`🌐 Entornos permitidos (CORS):`);
+  allowedOrigins.forEach(origin => console.log(`   • ${origin}`));
   console.log(`📁 Archivo de datos: ${DB_FILE}`);
   console.log(`🆔 PID: ${process.pid}`);
   console.log('⏰ Hora:', new Date().toLocaleString());
@@ -438,11 +483,10 @@ app.listen(PORT, () => {
   console.log('   • Token de autenticación');
   console.log('   • Sanitización XSS');
   console.log('   • Validación de entrada');
-  console.log('🏷️ SEGUNDA ENTIDAD: Categorías integradas');
+  console.log('   • CORS configurado para producción');
+  console.log('🏷️ ENTIDADES: Tareas y Categorías');
   console.log('🔑 Credenciales demo: admin / admin123');
   console.log('🔑 Token demo: demo-token-123');
-  console.log('🧪 Pruebas: http://localhost:3000/api/test/unitarias');
-  console.log('🧪 Prueba Integración: http://localhost:3000/api/test/integracion');
   console.log('=========================================');
 });
 
